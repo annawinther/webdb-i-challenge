@@ -21,23 +21,36 @@ function createNewAccount({ name, budget }){
 function updateAccountById(id, {name, budget}){
     return db('accounts').where({ id }).update({ name, budget })
 }
+
+function deleteById(id){
+    return db('accounts').where({ id }).del();
+}
 server.get('/', async (req, res) => {
     res.json("success!")
 })
 
 server.get('/accounts', async (req, res) => {
     // pull all accounts from db
-    const accounts = await getAllAccounts();
-    // send accounts back to client
-    res.json(accounts);
+    try{ 
+        const accounts = await getAllAccounts();
+        // send accounts back to client
+        res.status(200).json(accounts);
+    }catch (error){ 
+        res.status(500).json({ message: "could not get all accounts"  })
+    }
+   
   });
 
 server.get('/accounts/:id', async (req, res) => {
-    const account = await getAccountById(req.params.id);
-    res.json(account[0])
+    try {
+        const account = await getAccountById(req.params.id);
+        res.status(200).json(account[0])
+    } catch (error) {
+        res.status(500).json({ message: "could not get the account with that id" })
+    }
 })
 
-server.post('/accounts', async (req,res, next) => {
+server.post('/accounts', async (req, res, next) => {
     try {
         const newAccountId = await createNewAccount(req.body);
         const arrayOfUsers = await getAccountById(newAccountId[0]);
@@ -51,11 +64,21 @@ server.put('/accounts/:id', async (req, res) => {
     try {
         const { name, budget } = req.body;
         const updatedAccountId = await updateAccountById(req.params.id, { name, budget });
-        const arrayUpdated = await getAccountById(updatedAccountId)
-        res.status(200).json(arrayUpdated);
+        // const arrayUpdated = await getAccountById(updatedAccountId)
+        res.status(200).json(updatedAccountId);
     } catch (error) {
-        res.status(500).json({message: "could not update account"})
+        res.status(500).json({message: "could not update account" })
     }
 })
+
+server.delete('/accounts/:id', async (req, res) => {
+    try {
+        const deltedAccount = await deleteById(req.params.id);
+        res.status(200).json({ message: "the accoun has been deleted" })
+    } catch (error) {
+        res.status(200).json({ error: "could not delete account" })
+    }
+})
+
 
 module.exports = server;
