@@ -50,10 +50,11 @@ server.post('/accounts', async (req,res, next) => {
 server.put('/accounts/:id', async (req, res) => {
     try {
         const { name, budget } = req.body;
-        const result = await updateAccountById(req.params.id, { name, budget });
-        res.status(200).json(result);
-    } catch {
-        res.status(500).json({message: "could not delete account"})
+        const updatedAccountId = await updateAccountById(req.params.id, { name, budget });
+        const arrayUpdated = await getAccountById(updatedAccountId)
+        res.status(200).json(arrayUpdated);
+    } catch (error) {
+        res.status(500).json({message: "could not update account"})
     }
 })
 
