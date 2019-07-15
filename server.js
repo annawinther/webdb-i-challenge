@@ -43,8 +43,13 @@ server.get('/accounts', async (req, res) => {
 
 server.get('/accounts/:id', async (req, res) => {
     try {
-        const account = await getAccountById(req.params.id);
-        res.status(200).json(account[0])
+        const { id } = req.params;
+        const account = await getAccountById(id);
+        if (account[0]){
+            res.status(200).json(account[0])
+        } else {
+            res.status(404).json({ message: "the account with this id is not found" })
+        }
     } catch (error) {
         res.status(500).json({ message: "could not get the account with that id" })
     }
@@ -74,7 +79,7 @@ server.put('/accounts/:id', async (req, res) => {
 server.delete('/accounts/:id', async (req, res) => {
     try {
         const deltedAccount = await deleteById(req.params.id);
-        res.status(200).json({ message: "the accoun has been deleted" })
+        res.status(200).json({ message: `${deltedAccount} account has been deleted` })
     } catch (error) {
         res.status(200).json({ error: "could not delete account" })
     }
