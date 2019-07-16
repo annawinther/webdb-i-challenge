@@ -11,7 +11,7 @@ function getAllAccounts(){
 }
 
 function getAccountById(id){
-    return db('accounts').where({ id });
+    return db('accounts').where({ id }).first();
 }
 
 function createNewAccount({ name, budget }){
@@ -25,6 +25,7 @@ function updateAccountById(id, {name, budget}){
 function deleteById(id){
     return db('accounts').where({ id }).del();
 }
+
 server.get('/', async (req, res) => {
     res.json("success!")
 })
@@ -45,8 +46,8 @@ server.get('/accounts/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const account = await getAccountById(id);
-        if (account[0]){
-            res.status(200).json(account[0])
+        if (account){
+            res.status(200).json(account)
         } else {
             res.status(404).json({ message: "the account with this id is not found" })
         }
@@ -68,9 +69,9 @@ server.post('/accounts', async (req, res, next) => {
 server.put('/accounts/:id', async (req, res) => {
     try {
         const { name, budget } = req.body;
-        const updatedAccountId = await updateAccountById(req.params.id, { name, budget });
-        // const arrayUpdated = await getAccountById(updatedAccountId)
-        res.status(200).json(updatedAccountId);
+        const numberOfChangedAccounts = await updateAccountById(req.params.id, { name, budget });
+        const arrayUpdated = await getAccountById(req.params.id)
+        res.status(200).json(arrayUpdated);
     } catch (error) {
         res.status(500).json({message: "could not update account" })
     }
